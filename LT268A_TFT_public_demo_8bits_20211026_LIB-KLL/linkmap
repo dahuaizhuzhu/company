@@ -1,0 +1,43 @@
+MEMORY 
+{
+        rom  : ORIGIN = 0x00001800, LENGTH = 58k
+        ram  : ORIGIN = 0x00800000, LENGTH = 0x1E00
+}
+
+STACK_LOCATION = 0x00801DFC ;
+
+
+SECTIONS 
+{
+        .text_entry   : { 
+        					VECTOR_LOCATION = .;
+							KEEP(*vector_table.o(.rodata*));
+                        } >rom
+
+        .rodata :       {
+						  *( .rodata*);
+                        } >rom
+
+        .text   :       {
+                          *( .text*);
+						  . = ALIGN(8);  
+                          _end_text = .;
+                        } >rom = 0xbebe
+
+        .data   :    	AT(_end_text)
+                        { _start_data = .;
+                          *( .data );
+						  . = ALIGN(4);  
+                          _end_data = .; 
+                        } >ram
+
+        .bss    :       { _bss_start = .; 
+                          *( .bss ) *(COMMON); 
+                          . = . + 0x08;
+                          _bss_end = .;
+                        } >ram
+}
+
+PROVIDE (_end = STACK_LOCATION - 0x2000);
+        
+
